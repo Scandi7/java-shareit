@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
@@ -77,14 +78,14 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> searchItems(String text) {
-        if (text == null || text.isBlank()) {
+        if (!StringUtils.hasText(text)) {
             return Collections.emptyList();
         }
         String lowerText = text.toLowerCase();
         return items.values().stream()
                 .filter(item -> item.getAvailable() &&
-                        (item.getName().toLowerCase().contains(lowerText) ||
-                                item.getDescription().toLowerCase().contains(lowerText)))
+                        ((item.getName() != null && item.getName().toLowerCase().contains(lowerText)) ||
+                                (item.getDescription() != null && item.getDescription().toLowerCase().contains(lowerText))))
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
     }

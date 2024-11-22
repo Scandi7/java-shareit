@@ -17,7 +17,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(UserDto userDto) {
-        if (users.values().stream().anyMatch(u -> u.getEmail().equals(userDto.getEmail()))) {
+        if (!isEmailUnique(userDto.getEmail())) {
             throw new IllegalArgumentException("Email уже существует");
         }
 
@@ -52,10 +52,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUserById(Long userId) {
-        User user = users.get(userId);
-        if (user == null) {
-            throw new NoSuchElementException("Пользователь не найден");
-        }
+        User user = getUserEntityById(userId);
         return UserMapper.toUserDto(user);
     }
 
@@ -82,4 +79,9 @@ public class UserServiceImpl implements UserService {
         }
         return user;
     }
+
+    private boolean isEmailUnique(String email) {
+        return users.values().stream().noneMatch(user -> user.getEmail().equals(email));
+    }
+
 }
