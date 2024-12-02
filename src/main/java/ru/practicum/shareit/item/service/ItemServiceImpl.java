@@ -134,6 +134,7 @@ public class ItemServiceImpl implements ItemService {
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
+
     @Transactional
     public CommentDto addComment(Long userId, Long itemId, CommentDto commentDto) {
         User author = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("Пользователь не найден"));
