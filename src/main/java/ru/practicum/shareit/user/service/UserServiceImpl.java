@@ -20,7 +20,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public UserDto createUser(UserDto userDto) {
         if (userRepository.findByEmail(userDto.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Email уже существует");
