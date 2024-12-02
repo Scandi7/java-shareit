@@ -35,6 +35,7 @@ public class ItemController {
                                               @RequestBody ItemDto itemDto) {
         return new ResponseEntity<>(itemService.updateItem(userId, itemId, itemDto), HttpStatus.OK);
     }
+
     @GetMapping("/{itemId}")
     public ResponseEntity<ItemWithDateDto> getItem(@RequestHeader("X-Sharer-User-Id") Long userId,
                                                    @PathVariable Long itemId) {
