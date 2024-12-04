@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.service;
 
+import ru.practicum.shareit.exception.ItemNotAvailableException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemWithDateDto;
@@ -17,6 +18,6 @@ public interface ItemService {
 
     List<ItemDto> searchItems(String text);
 
-    CommentDto addComment(Long itemId, Long userId, CommentDto commentDto);
+    CommentDto addComment(Long itemId, Long userId, CommentDto commentDto) throws ItemNotAvailableException;
     //List<CommentDto> getCommentsByItemId(Long itemId);
 }

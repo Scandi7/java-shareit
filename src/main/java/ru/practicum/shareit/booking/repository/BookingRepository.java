@@ -40,6 +40,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query("SELECT b FROM Booking b WHERE b.item.id = :itemId AND b.start > :now ORDER BY b.start ASC")
     List<Booking> findNextBooking(Long itemId, LocalDateTime now);
+
+    boolean existsByBooker_IdAndItem_IdAndEndIsBefore(Long userId, Long itemId, LocalDateTime now);
 }
 
 

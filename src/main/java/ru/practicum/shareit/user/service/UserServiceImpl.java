@@ -41,7 +41,7 @@ public class UserServiceImpl implements UserService {
         }
 
         if (userDto.getEmail() != null && !userDto.getEmail().equals(user.getEmail())) {
-            if (userRepository.findByEmail(userDto.getEmail()).isPresent()) {
+            if (userRepository.existsByEmail(userDto.getEmail())) {
                 throw new IllegalArgumentException("Email уже существует");
             }
             user.setEmail(userDto.getEmail());

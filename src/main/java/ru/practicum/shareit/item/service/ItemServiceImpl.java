@@ -88,16 +88,8 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new NoSuchElementException("Вещь не найдена"));
         LocalDateTime now = LocalDateTime.now();
 
-        LocalDateTime lastBooking = bookingRepository.findLastBooking(itemId, now).stream()
-                .filter(booking -> booking.getEnd().isBefore(now))
-                .findFirst()
-                .map(booking -> booking.getStart())
-                .orElse(null);
-
-        LocalDateTime nextBooking = bookingRepository.findNextBooking(itemId, now).stream()
-                .findFirst()
-                .map(booking -> booking.getStart())
-                .orElse(null);
+        LocalDateTime lastBooking = getLastBooking(itemId, now);
+        LocalDateTime nextBooking = getNextBooking(itemId, now);
 
         return ItemWithDateMapper.toDtoWithDate(item, lastBooking, nextBooking);
     }
@@ -109,16 +101,8 @@ public class ItemServiceImpl implements ItemService {
 
         return items.stream()
                 .map(item -> {
-                    LocalDateTime lastBooking = bookingRepository.findLastBooking(item.getId(), now).stream()
-                            .filter(booking -> booking.getEnd().isBefore(now))
-                            .findFirst()
-                            .map(booking -> booking.getStart())
-                            .orElse(null);
-
-                    LocalDateTime nextBooking = bookingRepository.findNextBooking(item.getId(), now).stream()
-                            .findFirst()
-                            .map(booking -> booking.getStart())
-                            .orElse(null);
+                    LocalDateTime lastBooking = getLastBooking(item.getId(), now);
+                    LocalDateTime nextBooking = getNextBooking(item.getId(), now);
 
                     return ItemWithDateMapper.toDtoWithDate(item, lastBooking, nextBooking);
                 })
@@ -136,12 +120,12 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Transactional
-    public CommentDto addComment(Long userId, Long itemId, CommentDto commentDto) {
+    public CommentDto addComment(Long userId, Long itemId, CommentDto commentDto) throws ItemNotAvailableException {
         User author = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("Пользователь не найден"));
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new NoSuchElementException("Вещь не найдена"));
 
-        boolean hasBooked = bookingRepository.findByBooker_IdAndItem_IdAndEndIsBefore(userId, itemId, LocalDateTime.now())
-                .size() > 0;
+        boolean hasBooked = bookingRepository.existsByBooker_IdAndItem_IdAndEndIsBefore(userId, itemId,
+                LocalDateTime.now());
 
         if (!hasBooked) {
             throw new ItemNotAvailableException("Пользователь не арендовал вещь или срок аренды не закончился");
@@ -152,6 +136,20 @@ public class ItemServiceImpl implements ItemService {
         Comment savedComment = commentRepository.save(comment);
 
         return CommentMapper.toCommentDto(savedComment);
+    }
+
+    private LocalDateTime getLastBooking(Long itemId, LocalDateTime now) {
+        return bookingRepository.findLastBooking(itemId, now).stream()
+                .findFirst()
+                .map(booking -> booking.getStart())
+                .orElse(null);
+    }
+
+    private LocalDateTime getNextBooking(Long itemId, LocalDateTime now) {
+        return bookingRepository.findNextBooking(itemId, now).stream()
+                .findFirst()
+                .map(booking -> booking.getStart())
+                .orElse(null);
     }
 
 /*    public List<CommentDto> getCommentsByItemId(Long itemId) {
