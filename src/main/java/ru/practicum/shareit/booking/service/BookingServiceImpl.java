@@ -40,7 +40,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public BookingDto createBooking(Long userId, BookingDto bookingDto) throws ItemNotAvailableException{
+    public BookingDto createBooking(Long userId, BookingDto bookingDto) throws ItemNotAvailableException {
         User booker = userRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchElementException("Пользователь не найден"));
         Item item = itemRepository.findById(bookingDto.getItemId())

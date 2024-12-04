@@ -56,6 +56,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleCommentNotFound(CommentNotFoundException ex) {
         return new ResponseEntity<>(new ErrorResponse(ex.getMessage()), HttpStatus.NOT_FOUND);
     }
+
     @ExceptionHandler(BookingAccessException.class)
     public ResponseEntity<ErrorResponse> handleBookingAccessException(BookingAccessException ex) {
         return new ResponseEntity<>(new ErrorResponse(ex.getMessage()), HttpStatus.BAD_REQUEST);
