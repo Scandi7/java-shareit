@@ -1,87 +1,81 @@
 package ru.practicum.shareit.user.service;
 
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
 
-    private final Map<Long, User> users = new HashMap<>();
-    private final AtomicLong idGenerator = new AtomicLong(1);
+    private final UserRepository userRepository;
+
+    public UserServiceImpl(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @Override
     public UserDto createUser(UserDto userDto) {
-        if (!isEmailUnique(userDto.getEmail())) {
+        if (userRepository.findByEmail(userDto.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Email уже существует");
         }
 
         User user = UserMapper.toUser(userDto);
-        user.setId(idGenerator.getAndIncrement());
-        users.put(user.getId(), user);
-        return UserMapper.toUserDto(user);
+        User savedUser = userRepository.save(user);
+        return UserMapper.toUserDto(savedUser);
     }
 
     @Override
+    @Transactional
     public UserDto updateUser(Long userId, UserDto userDto) {
-        User existingUser = users.get(userId);
-        if (existingUser == null) {
-            throw new NoSuchElementException("Пользователь не найден");
-        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("Пользователь не найден"));
 
         if (userDto.getName() != null) {
-            existingUser.setName(userDto.getName());
+            user.setName(userDto.getName());
         }
 
-        if (userDto.getEmail() != null) {
-            if (users.values().stream()
-                    .anyMatch(u -> !u.getId().equals(userId) && u.getEmail().equals(userDto.getEmail()))) {
+        if (userDto.getEmail() != null && !userDto.getEmail().equals(user.getEmail())) {
+            if (userRepository.existsByEmail(userDto.getEmail())) {
                 throw new IllegalArgumentException("Email уже существует");
             }
-            existingUser.setEmail(userDto.getEmail());
+            user.setEmail(userDto.getEmail());
         }
 
-        users.put(userId, existingUser);
-        return UserMapper.toUserDto(existingUser);
+        User updatedUser = userRepository.save(user);
+        return UserMapper.toUserDto(updatedUser);
     }
 
     @Override
     public UserDto getUserById(Long userId) {
-        User user = getUserEntityById(userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("Пользователь не найден"));
         return UserMapper.toUserDto(user);
     }
 
     @Override
     public List<UserDto> getAllUsers() {
-        return users.values().stream()
+        return userRepository.findAll().stream()
                 .map(UserMapper::toUserDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public void deleteUser(Long userId) {
-        if (!users.containsKey(userId)) {
+        if (!userRepository.existsById(userId)) {
             throw new NoSuchElementException("Пользователь не найден");
         }
-        users.remove(userId);
+        userRepository.deleteById(userId);
     }
 
     @Override
     public User getUserEntityById(Long userId) {
-        User user = users.get(userId);
-        if (user == null) {
-            throw new NoSuchElementException("Пользователь не найден");
-        }
-        return user;
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("Пользователь не найден"));
     }
-
-    private boolean isEmailUnique(String email) {
-        return users.values().stream().noneMatch(user -> user.getEmail().equals(email));
-    }
-
 }

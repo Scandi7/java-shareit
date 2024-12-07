@@ -1,17 +1,27 @@
 package ru.practicum.shareit.item.mapper;
 
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ItemMapper {
     public static ItemDto toItemDto(Item item) {
         Long requestId = item.getRequest() != null ? item.getRequest().getId() : null;
+        List<CommentDto> comments = item.getComments().stream()
+                .map(CommentMapper::toCommentDto)
+                .collect(Collectors.toList());
+
         return new ItemDto(
                 item.getId(),
                 item.getName(),
                 item.getDescription(),
                 item.getAvailable(),
-                requestId
+                requestId,
+                comments
+
         );
     }
 
@@ -22,7 +32,9 @@ public class ItemMapper {
                 itemDto.getDescription(),
                 itemDto.getAvailable(),
                 owner,
-                null
+                null,
+                List.of()
+
         );
     }
 }

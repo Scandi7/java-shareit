@@ -16,6 +16,11 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new ErrorResponse(ex.getMessage()), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(ItemNotAvailableException.class)
+    public ResponseEntity<String> handleItemNotAvailable(ItemNotAvailableException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleConflict(IllegalArgumentException ex) {
         return new ResponseEntity<>(new ErrorResponse(ex.getMessage()), HttpStatus.CONFLICT);
@@ -45,5 +50,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAllExceptions(Exception ex) {
         return new ResponseEntity<>(new ErrorResponse("Внутренняя ошибка сервера"), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(CommentNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleCommentNotFound(CommentNotFoundException ex) {
+        return new ResponseEntity<>(new ErrorResponse(ex.getMessage()), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(BookingAccessException.class)
+    public ResponseEntity<ErrorResponse> handleBookingAccessException(BookingAccessException ex) {
+        return new ResponseEntity<>(new ErrorResponse(ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
 }
