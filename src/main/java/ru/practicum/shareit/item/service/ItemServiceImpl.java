@@ -16,7 +16,9 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -33,25 +35,36 @@ public class ItemServiceImpl implements ItemService {
     private final CommentRepository commentRepository;
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
+    private final ItemRequestRepository itemRequestRepository;
 
     public ItemServiceImpl(ItemRepository itemRepository, UserService userService, CommentRepository commentRepository,
-                           BookingRepository bookingRepository, UserRepository userRepository) {
+                           BookingRepository bookingRepository, UserRepository userRepository,
+                           ItemRequestRepository itemRequestRepository) {
         this.itemRepository = itemRepository;
         this.userService = userService;
         this.commentRepository = commentRepository;
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
+        this.itemRequestRepository = itemRequestRepository;
     }
 
     @Override
     @Transactional
     public ItemDto createItem(Long userId, ItemDto itemDto) {
         User owner = userService.getUserEntityById(userId);
+
         if (itemDto.getName() == null || itemDto.getName().isEmpty()) {
             throw new IllegalArgumentException("Название вещи не может быть пустым");
         }
 
-        Item item = ItemMapper.toItem(itemDto, owner);
+        ItemRequest itemRequest = null;
+
+        if (itemDto.getRequestId() != null) {
+            itemRequest = itemRequestRepository.findById(itemDto.getRequestId())
+                    .orElseThrow(() -> new IllegalArgumentException("Запрос не найден"));
+        }
+
+        Item item = ItemMapper.toItem(itemDto, owner, itemRequest);
         Item savedItem = itemRepository.save(item);
         return ItemMapper.toItemDto(savedItem);
     }

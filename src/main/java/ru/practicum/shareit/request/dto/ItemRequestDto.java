@@ -4,8 +4,10 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.practicum.shareit.item.dto.ItemDto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -16,4 +18,5 @@ public class ItemRequestDto {
     private String description;
     private Long requestor;
     private LocalDateTime created;
+    private List<ItemDto> items;
 }
