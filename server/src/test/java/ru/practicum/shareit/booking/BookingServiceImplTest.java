@@ -129,4 +129,155 @@ public class BookingServiceImplTest {
         assertNotNull(bookings);
         assertEquals(2, bookings.size());
     }
+
+    @Test
+    public void getAllBookingsCurrentStateTest() throws ItemNotAvailableException {
+        BookingDto bookingDto = createBookingForUser(booker, item, LocalDateTime.now().minusDays(1),
+                LocalDateTime.now().plusDays(1));
+
+        List<BookingDto> bookings = bookingService.getAllBookings(booker.getId(), State.CURRENT);
+
+        assertNotNull(bookings);
+        assertTrue(bookings.size() > 0);
+    }
+
+    @Test
+    public void getAllBookingsPastStateTest() throws ItemNotAvailableException {
+        BookingDto bookingDto = createBookingForUser(booker, item, LocalDateTime.now().minusDays(2),
+                LocalDateTime.now().minusDays(1));
+
+        List<BookingDto> bookings = bookingService.getAllBookings(booker.getId(), State.PAST);
+
+        assertNotNull(bookings);
+        assertTrue(bookings.size() > 0);
+    }
+
+    @Test
+    public void getAllBookingsFutureStateTest() throws ItemNotAvailableException {
+        BookingDto bookingDto = createBookingForUser(booker, item, LocalDateTime.now().plusDays(1),
+                LocalDateTime.now().plusDays(2));
+
+        List<BookingDto> bookings = bookingService.getAllBookings(booker.getId(), State.FUTURE);
+
+        assertNotNull(bookings);
+        assertTrue(bookings.size() > 0);
+    }
+
+    @Test
+    public void getAllBookingsWaitingStateTest() throws ItemNotAvailableException {
+        BookingDto bookingDto = createBookingForUser(booker, item, LocalDateTime.now().plusDays(1),
+                LocalDateTime.now().plusDays(2));
+        bookingService.createBooking(booker.getId(), bookingDto);
+
+        List<BookingDto> bookings = bookingService.getAllBookings(booker.getId(), State.WAITING);
+
+        assertNotNull(bookings);
+        assertTrue(bookings.size() > 0);
+    }
+
+    @Test
+    public void getAllBookingsRejectedStateTest() throws ItemNotAvailableException, BookingAccessException {
+        BookingDto bookingDto = createBookingForUser(booker, item, LocalDateTime.now().plusDays(1),
+                LocalDateTime.now().plusDays(2));
+        bookingService.createBooking(booker.getId(), bookingDto);
+        bookingService.approveBooking(owner.getId(), bookingDto.getId(), false);
+
+        List<BookingDto> bookings = bookingService.getAllBookings(booker.getId(), State.REJECTED);
+
+        assertNotNull(bookings);
+        assertTrue(bookings.size() > 0);
+    }
+
+    @Test
+    public void getAllBookingsDefaultStateTest() throws ItemNotAvailableException {
+        BookingDto bookingDto1 = createBookingForUser(booker, item, LocalDateTime.now().plusDays(1),
+                LocalDateTime.now().plusDays(2));
+        BookingDto bookingDto2 = createBookingForUser(booker, item, LocalDateTime.now().minusDays(3),
+                LocalDateTime.now().minusDays(2));
+
+        List<BookingDto> bookings = bookingService.getAllBookings(booker.getId(), State.ALL);
+
+        assertNotNull(bookings);
+        assertEquals(2, bookings.size());
+    }
+
+    @Test
+    public void getBookingsForOwnerCurrentStateTest() throws ItemNotAvailableException {
+        BookingDto bookingDto = createBookingForUser(booker, item, LocalDateTime.now().minusDays(1),
+                LocalDateTime.now().plusDays(1));
+
+        List<BookingDto> bookings = bookingService.getBookingsForOwner(owner.getId(), State.CURRENT);
+
+        assertNotNull(bookings);
+        assertTrue(bookings.size() > 0);
+    }
+
+    @Test
+    public void getBookingsForOwnerPastStateTest() throws ItemNotAvailableException {
+        BookingDto bookingDto = createBookingForUser(booker, item, LocalDateTime.now().minusDays(2),
+                LocalDateTime.now().minusDays(1));
+
+        List<BookingDto> bookings = bookingService.getBookingsForOwner(owner.getId(), State.PAST);
+
+        assertNotNull(bookings);
+        assertTrue(bookings.size() > 0);
+    }
+
+    @Test
+    public void getBookingsForOwnerFutureStateTest() throws ItemNotAvailableException {
+        BookingDto bookingDto = createBookingForUser(booker, item, LocalDateTime.now().plusDays(1),
+                LocalDateTime.now().plusDays(2));
+
+        List<BookingDto> bookings = bookingService.getBookingsForOwner(owner.getId(), State.FUTURE);
+
+        assertNotNull(bookings);
+        assertTrue(bookings.size() > 0);
+    }
+
+    @Test
+    public void getBookingsForOwnerWaitingStateTest() throws ItemNotAvailableException {
+        BookingDto bookingDto = createBookingForUser(booker, item, LocalDateTime.now().plusDays(1),
+                LocalDateTime.now().plusDays(2));
+        bookingService.createBooking(booker.getId(), bookingDto);
+
+        List<BookingDto> bookings = bookingService.getBookingsForOwner(owner.getId(), State.WAITING);
+
+        assertNotNull(bookings);
+        assertTrue(bookings.size() > 0);
+    }
+
+    @Test
+    public void getBookingsForOwnerRejectedStateTest() throws ItemNotAvailableException, BookingAccessException {
+        BookingDto bookingDto = createBookingForUser(booker, item, LocalDateTime.now().plusDays(1),
+                LocalDateTime.now().plusDays(2));
+        bookingService.createBooking(booker.getId(), bookingDto);
+        bookingService.approveBooking(owner.getId(), bookingDto.getId(), false);
+
+        List<BookingDto> bookings = bookingService.getBookingsForOwner(owner.getId(), State.REJECTED);
+
+        assertNotNull(bookings);
+        assertTrue(bookings.size() > 0);
+    }
+
+    @Test
+    public void getBookingsForOwnerDefaultStateTest() throws ItemNotAvailableException {
+        BookingDto bookingDto1 = createBookingForUser(booker, item, LocalDateTime.now().plusDays(1),
+                LocalDateTime.now().plusDays(2));
+        BookingDto bookingDto2 = createBookingForUser(booker, item, LocalDateTime.now().minusDays(3),
+                LocalDateTime.now().minusDays(2));
+
+        List<BookingDto> bookings = bookingService.getBookingsForOwner(owner.getId(), State.ALL);
+
+        assertNotNull(bookings);
+        assertEquals(2, bookings.size());
+    }
+
+    private BookingDto createBookingForUser(User user, Item item, LocalDateTime start, LocalDateTime end)
+            throws ItemNotAvailableException {
+        BookingDto bookingDto = new BookingDto();
+        bookingDto.setItemId(item.getId());
+        bookingDto.setStart(start);
+        bookingDto.setEnd(end);
+        return bookingService.createBooking(user.getId(), bookingDto);
+    }
 }
