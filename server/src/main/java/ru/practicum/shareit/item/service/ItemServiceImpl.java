@@ -165,11 +165,4 @@ public class ItemServiceImpl implements ItemService {
                 .map(booking -> booking.getStart())
                 .orElse(null);
     }
-
-/*    public List<CommentDto> getCommentsByItemId(Long itemId) {
-        List<Comment> comments = commentRepository.findByItem_Id(itemId);
-        return comments.stream()
-                .map(CommentMapper::toCommentDto)
-                .toList();
-    }*/
 }
